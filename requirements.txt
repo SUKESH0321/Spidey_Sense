@@ -1,0 +1,4 @@
+# Spidey Sense - runtime dependencies (Python 3.10+)
+pandas>=2.0        # candle DataFrames, backtesting engines
+requests>=2.31     # Binance PUBLIC REST endpoints (no API keys)
+Flask>=3.0         # web dashboard server (Jinja2 included transitively)

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spidey Sense · Binance Spot Bot</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🕷️</text></svg>">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+</head>
+<body>
+
+<!-- ==================== HEADER BAR ==================== -->
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">🕷️</div>
+    <div class="brand-text">
+      <h1>SPIDEY&nbsp;SENSE</h1>
+      <span>BINANCE SPOT BOT · PAPER ENGINE</span>
+    </div>
+  </div>
+
+  <div class="top-status">
+    <span id="mode-badge" class="badge badge-mode">PAPER TRADING</span>
+    <span id="sys-status" class="badge badge-online"><i class="dot"></i><span id="sys-status-text">CONNECTING…</span></span>
+  </div>
+
+  <div class="clock-box">
+    <span id="clock-time" class="clock-time">--:--:--</span>
+    <span id="clock-date" class="clock-date">SYNCING…</span>
+  </div>
+
+  <div class="controls">
+    <button id="btn-pause" class="btn btn-warn" type="button" aria-label="Pause or resume trading">⏸&nbsp;PAUSE TRADING</button>
+    <button id="btn-shutdown" class="btn btn-danger" type="button" aria-label="Emergency shutdown">⏻&nbsp;EMERGENCY&nbsp;SHUTDOWN</button>
+  </div>
+</header>
+
+<main class="container">
+
+  <!-- pause / emergency banner -->
+  <section id="alert-banner" class="banner" hidden>
+    <span id="alert-banner-icon">⚠</span><span id="alert-banner-text"></span>
+  </section>
+
+  <!-- ==================== PORTFOLIO SUMMARY (KPI CARDS) ==================== -->
+  <section class="kpi-grid">
+    <article class="card kpi" style="--accent:var(--blue)">
+      <header class="kpi-head">
+        <span class="kpi-label">TOTAL PORTFOLIO VALUE</span><span class="kpi-icon">$</span>
+      </header>
+      <div id="kpi-total" class="kpi-value">--</div>
+      <div class="kpi-sub"><span id="kpi-total-sub">initial --</span><span id="kpi-source" class="tag-src">LEDGER</span></div>
+    </article>
+
+    <article class="card kpi" style="--accent:var(--green)">
+      <header class="kpi-head">
+        <span class="kpi-label">AVAILABLE USDT</span><span class="kpi-icon">₮</span>
+      </header>
+      <div id="kpi-usdt" class="kpi-value">--</div>
+      <div class="kpi-sub"><span id="kpi-exposure-text">EXPOSURE --%</span><span class="meter"><i id="kpi-exposure-fill"></i></span></div>
+    </article>
+
+    <article class="card kpi" style="--accent:var(--amber)">
+      <header class="kpi-head">
+        <span class="kpi-label">NET P&amp;L</span><span class="kpi-icon">∆</span>
+      </header>
+      <div id="kpi-pnl" class="kpi-value">--</div>
+      <div class="kpi-sub"><span id="kpi-pnl-pct" class="delta">--</span><span id="kpi-pnl-sub" class="dim">realized -- · unrealized --</span></div>
+    </article>
+
+    <article class="card kpi" style="--accent:var(--green)">
+      <header class="kpi-head">
+        <span class="kpi-label">TRADES · WIN RATE</span><span class="kpi-icon">◎</span>
+      </header>
+      <div id="kpi-trades" class="kpi-value">0</div>
+      <div class="kpi-sub"><span id="kpi-winrate-text">no closed trades yet</span><span class="meter"><i id="kpi-winrate-fill"></i></span></div>
+    </article>
+  </section>
+
+  <!-- ==================== DUAL ASSET GRID ==================== -->
+  <section class="asset-grid">
+    <!-- BTC dedicated card -->
+    <article class="card asset-card" id="asset-card-BTC">
+      <div class="asset-head">
+        <div class="asset-icon btc">₿</div>
+        <div class="asset-title"><h2>BTC<span>/USDT</span></h2><span class="tf-tag">5m</span></div>
+        <div class="asset-price-box">
+          <span id="price-BTC" class="asset-price">--</span>
+          <span id="upd-BTC" class="asset-upd">awaiting feed</span>
+        </div>
+        <span id="state-BTC" class="state-badge" data-state="UNKNOWN">—</span>
+      </div>
+
+      <div class="asset-details">
+        <div class="det"><span class="det-k">Entry Price</span><b id="entry-BTC" class="det-v">--</b></div>
+        <div class="det"><span class="det-k">Position Size</span><b id="size-BTC" class="det-v">--</b></div>
+        <div class="det"><span class="det-k">Trailing Peak</span><b id="peak-BTC" class="det-v up">--</b></div>
+        <div class="det"><span class="det-k">Trailing Trough</span><b id="trough-BTC" class="det-v down">--</b></div>
+      </div>
+
+      <div id="pnlstrip-BTC" class="pnl-strip">
+        <span class="pnl-k">Unrealized P&amp;L</span>
+        <span class="pnl-vals"><b id="pnlval-BTC">--</b><i id="pnlpct-BTC"></i></span>
+      </div>
+
+      <div class="progress-block">
+        <div class="progress-top">
+          <span id="proglab-BTC" class="progress-label">—</span>
+          <span id="progthr-BTC" class="progress-threshold">—</span>
+        </div>
+        <div class="progress-track"><i id="progfill-BTC" class="progress-fill"></i></div>
+        <div id="progcap-BTC" class="progress-caption">waiting for market data…</div>
+      </div>
+
+      <div class="chip-row">
+        <span id="sig-BTC" class="chip">SIGNAL —</span>
+        <span id="stop-BTC" class="chip">STOP-LOSS —</span>
+        <span id="cool-BTC" class="chip chip-amber" hidden>COOLDOWN —</span>
+      </div>
+    </article>
+
+    <!-- ETH dedicated card -->
+    <article class="card asset-card" id="asset-card-ETH">
+      <div class="asset-head">
+        <div class="asset-icon eth">Ξ</div>
+        <div class="asset-title"><h2>ETH<span>/USDT</span></h2><span class="tf-tag">5m</span></div>
+        <div class="asset-price-box">
+          <span id="price-ETH" class="asset-price">--</span>
+          <span id="upd-ETH" class="asset-upd">awaiting feed</span>
+        </div>
+        <span id="state-ETH" class="state-badge" data-state="UNKNOWN">—</span>
+      </div>
+
+      <div class="asset-details">
+        <div class="det"><span class="det-k">Entry Price</span><b id="entry-ETH" class="det-v">--</b></div>
+        <div class="det"><span class="det-k">Position Size</span><b id="size-ETH" class="det-v">--</b></div>
+        <div class="det"><span class="det-k">Trailing Peak</span><b id="peak-ETH" class="det-v up">--</b></div>
+        <div class="det"><span class="det-k">Trailing Trough</span><b id="trough-ETH" class="det-v down">--</b></div>
+      </div>
+
+      <div id="pnlstrip-ETH" class="pnl-strip">
+        <span class="pnl-k">Unrealized P&amp;L</span>
+        <span class="pnl-vals"><b id="pnlval-ETH">--</b><i id="pnlpct-ETH"></i></span>
+      </div>
+
+      <div class="progress-block">
+        <div class="progress-top">
+          <span id="proglab-ETH" class="progress-label">—</span>
+          <span id="progthr-ETH" class="progress-threshold">—</span>
+        </div>
+        <div class="progress-track"><i id="progfill-ETH" class="progress-fill"></i></div>
+        <div id="progcap-ETH" class="progress-caption">waiting for market data…</div>
+      </div>
+
+      <div class="chip-row">
+        <span id="sig-ETH" class="chip">SIGNAL —</span>
+        <span id="stop-ETH" class="chip">STOP-LOSS —</span>
+        <span id="cool-ETH" class="chip chip-amber" hidden>COOLDOWN —</span>
+      </div>
+    </article>
+  </section>
+
+  <!-- ==================== RECENT TRADES TABLE ==================== -->
+  <section class="card trades-card">
+    <header class="card-head">
+      <h3>⚡ RECENT TRADES</h3>
+      <span id="trades-count" class="pill-muted">0 FILLS</span>
+    </header>
+    <div class="table-wrap">
+      <table id="trades-table">
+        <thead>
+          <tr>
+            <th>Time</th><th>Asset</th><th>Side</th><th>Price</th><th>Quantity</th>
+            <th>Cost ($)</th><th>Fee ($)</th><th>Exit Reason</th><th>Net P&amp;L ($)</th>
+          </tr>
+        </thead>
+        <tbody id="trades-body">
+          <tr class="placeholder"><td colspan="9">Waiting for ledger data…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer class="dash-footer">
+    <span>🕷 Spidey Sense · <b>PAPER TRADING SIMULATION</b> — no real orders are ever placed.</span>
+    <span id="conn-note">connecting to /api/status…</span>
+  </footer>
+
+  <noscript><div class="banner warn">JavaScript is disabled — live updates require it.</div></noscript>
+</main>
+
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+</html>
